@@ -98,7 +98,7 @@ $core_kosong = $total_core - $core_terisi;
         .user-badge .avatar {
             width: 32px;
             height: 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f2ba9ff 0%, #09139fff 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -129,7 +129,7 @@ $core_kosong = $total_core - $core_terisi;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f2ba9ff 0%, #09139fff 100%);
             color: white;
         }
 
@@ -281,7 +281,7 @@ $core_kosong = $total_core - $core_terisi;
         }
 
         .closure-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1f3fb1ff;
             padding: 20px;
             color: white;
             position: relative;
@@ -536,7 +536,7 @@ $core_kosong = $total_core - $core_terisi;
 
         <div class="search-section">
             <form method="get" class="search-form">
-                <input type="text" name="cari" placeholder="🔍 Cari berdasarkan nama atau kode closure..." value="<?= htmlspecialchars($search) ?>">
+                <input type="text" name="cari" placeholder="Cari berdasarkan nama atau kode closure..." value="<?= htmlspecialchars($search) ?>">
                 <button type="submit" class="btn btn-primary">Cari</button>
                 <?php if($search): ?>
                     <a href="dashboard.php" class="btn btn-outline" style="border-color: #667eea; color: #667eea;">Reset</a>
@@ -583,12 +583,6 @@ $core_kosong = $total_core - $core_terisi;
                     </div>
 
                     <div class="core-visual">
-                        <div class="core-progress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <?= $progress ?>%"></div>
-                            </div>
-                            <span class="progress-percentage"><?= round($progress) ?>%</span>
-                        </div>
                         <div class="core-info-text">
                             <?= $d['core_terisi'] ?> dari <?= $d['total_core'] ?> core terisi
                         </div>
