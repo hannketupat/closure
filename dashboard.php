@@ -154,7 +154,7 @@ $core_kosong = $total_core - $core_terisi;
                             </div>
                         </div>
                         <div class="ml-5 flex-1 text-right">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">Core Terisi</p>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">Core Aktif</p>
                             <h4 class="text-3xl font-bold text-gray-800"><?= $core_terisi ?></h4>
                         </div>
                     </div>
