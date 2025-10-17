@@ -14,7 +14,7 @@ if (!$closure) {
     exit;
 }
 
-$core_query = "SELECT * FROM core_warna WHERE id_closure = $id";
+$core_query = "SELECT * FROM core_warna WHERE id_closure = $id ORDER BY id ASC";
 $core_data = mysqli_query($conn, $core_query);
 ?>
 <!DOCTYPE html>
