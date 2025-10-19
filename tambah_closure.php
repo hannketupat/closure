@@ -11,6 +11,10 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Closure Baru</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
         * {
             box-sizing: border-box;
@@ -117,6 +121,25 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
             gap: 20px;
         }
 
+        /* ===== Map Container ===== */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            margin-top: 10px;
+        }
+
+        .map-info {
+            background: #f0f7ff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #1f3fb1;
+            margin-bottom: 15px;
+            border-left: 3px solid #1f3fb1;
+        }
+
         /* ===== Core Table ===== */
         .core-table-wrapper {
             overflow-x: auto;
@@ -157,7 +180,6 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
             border-color: #000;
             background: #fff;
         }
-
 
         /* ===== Warna Core Preview Only ===== */
         .core-color {
@@ -232,8 +254,15 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
             .btn {
                 width: 100%;
             }
+
+            #map {
+                height: 300px;
+            }
         }
     </style>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         const warna12 = [{
@@ -288,7 +317,7 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
 
         function tampilkanTabelCore() {
             const jenis = document.getElementById("jenis_kabel").value;
-            const jumlah = jenis === "12 core" ? 12 : jenis === "24 core" ? 24 : 0;
+            const jumlah = jenis === "4 core" ? 4 : jenis === "8 core" ? 8 : jenis === "12 core" ? 12 : jenis === "24 core" ? 24 : 0;
             const tabelDiv = document.getElementById("tabel_core");
 
             if (jumlah === 0) {
@@ -329,6 +358,48 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
             html += `</tbody></table></div>`;
             tabelDiv.innerHTML = html;
         }
+
+        // Leaflet Map
+        let map, marker;
+
+        function initMap() {
+            // Default koordinat Jakarta
+            const defaultLat = -6.586363275689849; 
+            const defaultLng = 106.75895461056768;
+
+            map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            marker = L.marker([defaultLat, defaultLng], {
+                draggable: true
+            }).addTo(map);
+
+            // Update koordinat saat marker dipindah
+            marker.on('dragend', function(e) {
+                const pos = marker.getLatLng();
+                updateKoordinat(pos.lat, pos.lng);
+            });
+
+            // Klik map untuk set marker
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                updateKoordinat(e.latlng.lat, e.latlng.lng);
+            });
+
+            // Set koordinat awal
+            updateKoordinat(defaultLat, defaultLng);
+        }
+
+        function updateKoordinat(lat, lng) {
+            document.getElementById('koordinat').value = lat.toFixed(6) + ',' + lng.toFixed(6);
+        }
+
+        // Initialize map setelah halaman load
+        window.addEventListener('load', initMap);
     </script>
 </head>
 
@@ -358,6 +429,8 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
                         <label>Jenis Kabel</label>
                         <select name="jenis_kabel" id="jenis_kabel" onchange="tampilkanTabelCore()" required>
                             <option value="">-- Pilih Jenis Kabel --</option>
+                            <option value="4 core">4 Core</option>
+                            <option value="8 core">8 Core</option>
                             <option value="12 core">12 Core</option>
                             <option value="24 core">24 Core</option>
                         </select>
@@ -371,15 +444,18 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
                         <textarea name="alamat_fisik" placeholder="Masukkan alamat lengkap..." required></textarea>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Koordinat GPS</label>
-                            <input type="text" name="koordinat" placeholder="-6.971112,107.633221">
+                    <div class="form-group">
+                        <label>Koordinat GPS</label>
+                        <div class="map-info">
+                            📍 Klik pada peta atau drag marker untuk menentukan lokasi closure
                         </div>
-                        <div class="form-group">
-                            <label>Jarak ke Tujuan (km)</label>
-                            <input type="number" step="0.01" name="jarak_tujuan" placeholder="Contoh: 2.5">
-                        </div>
+                        <input type="text" id="koordinat" name="koordinat" placeholder="-6.208800,106.845600" readonly>
+                        <div id="map"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Jarak ke Tujuan (km)</label>
+                        <input type="number" step="0.01" name="jarak_tujuan" placeholder="Contoh: 2.5">
                     </div>
                 </div>
             </div>

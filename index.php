@@ -71,7 +71,7 @@ if (isset($_POST['login'])) {
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffffffff 0%, #ecebffff 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -91,12 +91,13 @@ if (isset($_POST['login'])) {
 
         .login-left {
             flex: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #18309cff 0%, #0f0b51ff 100%);
             padding: 60px 40px;
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
         }
 
         .login-left h1 {
@@ -169,7 +170,7 @@ if (isset($_POST['login'])) {
         .btn-login {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #18309cff 0%, #0f0b51ff 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -209,9 +210,8 @@ if (isset($_POST['login'])) {
 <body>
     <div class="login-container">
         <div class="login-left">
-            <div class="fiber-icon">🔌</div>
             <h1>Sistem Manajemen Closure</h1>
-            <p>Platform terintegrasi untuk mengelola data closure fiber optic, monitoring core kabel, dan dokumentasi infrastruktur jaringan.</p>
+            <p>PT. Rafa Teknologi Solusi</p>
         </div>
         <div class="login-right">
             <h2>Selamat Datang</h2>
