@@ -54,17 +54,16 @@ $core_kosong = $total_core - $core_terisi;
         .gradient-danger {
             background: linear-gradient(60deg, #dc3545, #c82333);
         }
-        /* Penyesuaian Responsif untuk Card Actions */
         .closure-actions {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
         .closure-actions.show {
-            max-height: 200px; /* Nilai yang cukup besar untuk menampung aksi di mobile */
+            max-height: 200px;
         }
         
-        /* Mini Map Styles */
+        /* Mini Map Styles dengan hover effect */
         .mini-map {
             height: 180px;
             width: 100%;
@@ -72,6 +71,35 @@ $core_kosong = $total_core - $core_terisi;
             margin-bottom: 16px;
             overflow: hidden;
             border: 2px solid #e5e7eb;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mini-map:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .mini-map::after {
+            content: '📍 Buka di Google Maps';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .mini-map:hover::after {
+            opacity: 1;
         }
         
         .map-placeholder {
@@ -90,12 +118,11 @@ $core_kosong = $total_core - $core_terisi;
         
         @media (max-width: 768px) {
             .closure-actions.show {
-                max-height: 200px; /* Pertahankan di mobile */
+                max-height: 200px;
             }
             .mini-map, .map-placeholder {
                 height: 150px;
             }
-            /* Penyesuaian Navbar di Mobile */
             #navbar-main-menu {
                 display: none;
             }
@@ -103,12 +130,10 @@ $core_kosong = $total_core - $core_terisi;
                 display: block;
             }
             #navbar-actions {
-                /* Untuk memastikan tombol tambah dan logout terlihat */
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
             }
-            /* Sembunyikan Logo text di mobile */
             .logo-text-hidden {
                 display: none;
             }
@@ -252,7 +277,6 @@ $core_kosong = $total_core - $core_terisi;
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
             <?php while($d = mysqli_fetch_assoc($data)): 
                 $progress = $d['total_core'] > 0 ? ($d['core_terisi'] / $d['total_core']) * 100 : 0;
-                // Pastikan progress tidak lebih dari 100%
                 $progress = min(100, $progress);
                 $progress_color = $progress < 30 ? 'bg-red-500' : ($progress < 70 ? 'bg-yellow-500' : 'bg-green-500');
                 
@@ -272,7 +296,8 @@ $core_kosong = $total_core - $core_terisi;
                     <?php if($has_koordinat && $lat && $lng): ?>
                         <div class="mini-map" id="map-<?= $d['id_closure'] ?>" 
                              data-lat="<?= htmlspecialchars($lat) ?>" 
-                             data-lng="<?= htmlspecialchars($lng) ?>"></div>
+                             data-lng="<?= htmlspecialchars($lng) ?>"
+                             onclick="openGoogleMaps(event, <?= htmlspecialchars($lat) ?>, <?= htmlspecialchars($lng) ?>)"></div>
                     <?php else: ?>
                         <div class="map-placeholder">
                             Koordinat belum diset
@@ -353,6 +378,13 @@ $core_kosong = $total_core - $core_terisi;
     </div>
 
     <script>
+        // Function to open Google Maps
+        function openGoogleMaps(event, lat, lng) {
+            event.stopPropagation();
+            const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            window.open(googleMapsUrl, '_blank');
+        }
+
         // Initialize all mini maps
         document.addEventListener('DOMContentLoaded', function() {
             const mapElements = document.querySelectorAll('.mini-map');
@@ -362,9 +394,8 @@ $core_kosong = $total_core - $core_terisi;
                 const lng = parseFloat(mapEl.dataset.lng);
                 
                 if (!isNaN(lat) && !isNaN(lng)) {
-                    // Pastikan peta hanya diinisialisasi sekali
                     if (mapEl._leaflet_id) {
-                        mapEl._leaflet_id = null; // Reset jika ada id lama
+                        mapEl._leaflet_id = null;
                     }
                     
                     const miniMap = L.map(mapEl.id, {
@@ -384,18 +415,6 @@ $core_kosong = $total_core - $core_terisi;
                     }).addTo(miniMap);
                     
                     L.marker([lat, lng]).addTo(miniMap);
-                    
-                    // Enable interaction on click
-                    mapEl.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        // Memberikan sedikit indikasi bahwa peta dapat digeser/diperbesar saat di-klik
-                        miniMap.dragging.enable();
-                        miniMap.scrollWheelZoom.enable();
-                        miniMap.doubleClickZoom.enable();
-                        miniMap.touchZoom.enable();
-                        // Opsional: set view to center again if needed on interaction
-                        // miniMap.setView([lat, lng], 15);
-                    });
                 }
             });
         });
@@ -406,7 +425,6 @@ $core_kosong = $total_core - $core_terisi;
             const allCards = document.querySelectorAll('[onclick^="toggleCard"]');
             const allActions = document.querySelectorAll('.closure-actions');
             
-            // Close all other cards and remove shadow
             allCards.forEach(c => {
                 if (c !== card) {
                     c.classList.remove('shadow-2xl');
@@ -419,12 +437,10 @@ $core_kosong = $total_core - $core_terisi;
                 }
             });
             
-            // Toggle current card's shadow and actions
             card.classList.toggle('shadow-2xl');
             actions.classList.toggle('show');
         }
 
-        // Close all cards when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('[onclick^="toggleCard"]') && !event.target.closest('#navbar-main-menu')) {
                 const allCards = document.querySelectorAll('[onclick^="toggleCard"]');
@@ -438,7 +454,6 @@ $core_kosong = $total_core - $core_terisi;
                     actions.classList.remove('show');
                 });
                 
-                // Close mobile menu if open
                 const toggle = document.getElementById('navbar-toggle');
                 if (toggle) {
                     toggle.checked = false;
@@ -446,7 +461,6 @@ $core_kosong = $total_core - $core_terisi;
             }
         });
         
-        // Mobile Navbar Toggle Script
         const navbarToggle = document.getElementById('navbar-toggle');
         const navbarMenu = document.getElementById('navbar-main-menu');
 

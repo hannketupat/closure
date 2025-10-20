@@ -14,7 +14,7 @@ if (!$closure) {
     exit;
 }
 
-$core_query = "SELECT * FROM core_warna WHERE id_closure = $id ORDER BY id ASC";
+$core_query = "SELECT * FROM core_warna WHERE id_closure = $id";
 $core_data = mysqli_query($conn, $core_query);
 
 $has_koordinat = !empty($closure['koordinat']);
@@ -31,7 +31,9 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+        crossorigin="" />
   
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -248,6 +250,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
       font-size: 14px;
       font-weight: 600;
       transition: 0.3s;
+      cursor: pointer;
     }
 
     .btn:hover {
@@ -265,15 +268,32 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
       color: #fff;
     }
 
+    #map-error { 
+      display:none; 
+      background:#ffe6e6; 
+      border:1px solid #ffb3b3; 
+      color:#800; 
+      padding:10px; 
+      border-radius:6px; 
+      margin-bottom:10px; 
+    }
+
+    /* coord-controls removed: editing coordinates handled in Edit page */
+
     @media (max-width: 768px) {
       #detail-map, .map-placeholder {
         height: 250px;
       }
+
+      .coord-controls {
+        flex-direction: column;
+      }
+
+      #coord-input, #save-coord {
+        width: 100%;
+      }
     }
   </style>
-  
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
   <div class="navbar">
@@ -313,13 +333,8 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
     <!-- Map Section -->
     <div class="map-section">
       <h3>Lokasi Closure</h3>
-      <?php if($has_koordinat && $lat && $lng): ?>
-        <div id="detail-map"></div>
-      <?php else: ?>
-        <div class="map-placeholder">
-          <span>Koordinat belum diset untuk closure ini</span>
-        </div>
-      <?php endif; ?>
+      <div id="map-error">Peta gagal dimuat. Periksa koneksi internet atau coba refresh halaman.</div>
+      <div id="detail-map"></div>
     </div>
 
     <div class="closure-visual">
@@ -375,23 +390,57 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
     </div>
   </div>
 
-  <?php if($has_koordinat && $lat && $lng): ?>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+          crossorigin=""></script>
+
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const lat = <?= json_encode((float)$lat) ?>;
-      const lng = <?= json_encode((float)$lng) ?>;
+      // Check if Leaflet loaded
+      if (typeof L === 'undefined') {
+        document.getElementById('map-error').style.display = 'block';
+        document.getElementById('map-error').innerHTML = 'Leaflet tidak ter-load. Periksa koneksi internet.';
+        console.error('Leaflet library tidak ter-load!');
+        return;
+      }
       
-      const map = L.map('detail-map').setView([lat, lng], 16);
+      // default center if no koordinat set
+      const hasCoord = <?= $has_koordinat ? 'true' : 'false' ?>;
+      const lat = hasCoord ? <?= json_encode((float)$lat) ?> : -6.2088;
+      const lng = hasCoord ? <?= json_encode((float)$lng) ?> : 106.8456;
       
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      }).addTo(map);
+      console.log('Initializing map with coordinates:', lat, lng, 'hasCoord:', hasCoord);
       
-      const marker = L.marker([lat, lng]).addTo(map);
-      marker.bindPopup('<b><?= htmlspecialchars($closure['nama_closure']) ?></b><br><?= htmlspecialchars($closure['alamat_fisik']) ?>').openPopup();
+      try {
+        const map = L.map('detail-map').setView([lat, lng], hasCoord ? 16 : 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(map);
+        
+        let marker = null;
+        if (hasCoord) {
+          marker = L.marker([lat, lng]).addTo(map);
+          const popupContent = <?= json_encode('<b>' . htmlspecialchars($closure['nama_closure']) . '</b><br>' . htmlspecialchars($closure['alamat_fisik'])) ?>;
+          marker.bindPopup(popupContent).openPopup();
+        }
+        
+        // Coordinates are view-only on detail page. To change coordinates, open Edit page.
+        
+        // Force map to refresh size after a brief delay
+        setTimeout(function() {
+          map.invalidateSize();
+          console.log('Map size invalidated');
+        }, 100);
+        
+      } catch(error) {
+        console.error('Error initializing map:', error);
+        document.getElementById('map-error').style.display = 'block';
+        document.getElementById('map-error').innerHTML = 'Error memuat peta: ' + error.message;
+      }
     });
   </script>
-  <?php endif; ?>
 </body>
 </html>

@@ -494,8 +494,9 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
 
                     <div class="form-group">
                         <label>Koordinat GPS</label>
-                        <input type="text" id="koordinat" name="koordinat" value="<?= htmlspecialchars($closure['koordinat']) ?>" readonly>
-                        <div id="map"></div>
+                        <input type="text" id="koordinat" name="koordinat" value="<?= htmlspecialchars($closure['koordinat']) ?>" placeholder="-6.2088,106.8456">
+                        <div id="map" style="height:300px;border:1px solid #e0e0e0;margin-top:10px;border-radius:8px;"></div>
+                        <small>Anda bisa drag marker untuk mengubah koordinat atau paste langsung "lat,lng" lalu simpan.</small>
                     </div>
 
                     <div class="form-group">
@@ -643,6 +644,25 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
             map.on('click', function(e) {
                 marker.setLatLng(e.latlng);
                 updateKoordinat(e.latlng.lat, e.latlng.lng);
+            });
+
+            // handle paste/change on input to update marker
+            const coordInput = document.getElementById('koordinat');
+            function parseCoords(str) {
+                str = (str || '').trim();
+                const direct = str.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+                if (direct) return [parseFloat(direct[1]), parseFloat(direct[2])];
+                const at = str.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (at) return [parseFloat(at[1]), parseFloat(at[2])];
+                return null;
+            }
+
+            coordInput.addEventListener('change', function() {
+                const parsed = parseCoords(coordInput.value);
+                if (parsed) {
+                    marker.setLatLng(parsed);
+                    map.setView(parsed, 16);
+                }
             });
         }
 
