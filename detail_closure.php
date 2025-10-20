@@ -16,6 +16,11 @@ if (!$closure) {
 
 $core_query = "SELECT * FROM core_warna WHERE id_closure = $id ORDER BY id ASC";
 $core_data = mysqli_query($conn, $core_query);
+
+$has_koordinat = !empty($closure['koordinat']);
+$koordinat_parts = $has_koordinat ? explode(',', $closure['koordinat']) : [null, null];
+$lat = $has_koordinat && isset($koordinat_parts[0]) ? trim($koordinat_parts[0]) : null;
+$lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) : null;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -24,6 +29,10 @@ $core_data = mysqli_query($conn, $core_query);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detail Closure - <?= htmlspecialchars($closure['nama_closure']) ?></title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -106,6 +115,44 @@ $core_data = mysqli_query($conn, $core_query);
     .info-card .value {
       font-size: 15px;
       font-weight: 500;
+    }
+
+    /* Map Section */
+    .map-section {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .map-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #111;
+    }
+
+    #detail-map {
+      height: 350px;
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .map-placeholder {
+      height: 350px;
+      width: 100%;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 16px;
+      border: 2px dashed #d1d5db;
+      gap: 8px;
     }
 
     .closure-visual {
@@ -217,7 +264,16 @@ $core_data = mysqli_query($conn, $core_query);
       background: #000;
       color: #fff;
     }
+
+    @media (max-width: 768px) {
+      #detail-map, .map-placeholder {
+        height: 250px;
+      }
+    }
   </style>
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
   <div class="navbar">
@@ -242,7 +298,7 @@ $core_data = mysqli_query($conn, $core_query);
         <?php if($closure['koordinat']): ?>
         <div class="info-card">
           <div class="label">Koordinat GPS</div>
-          <div class="value"><?= htmlspecialchars($closure['koordinat']) ?></div>
+          <div class="value" style="font-family: monospace; font-size: 13px;"><?= htmlspecialchars($closure['koordinat']) ?></div>
         </div>
         <?php endif; ?>
         <?php if($closure['jarak_tujuan']): ?>
@@ -252,6 +308,18 @@ $core_data = mysqli_query($conn, $core_query);
         </div>
         <?php endif; ?>
       </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="map-section">
+      <h3>Lokasi Closure</h3>
+      <?php if($has_koordinat && $lat && $lng): ?>
+        <div id="detail-map"></div>
+      <?php else: ?>
+        <div class="map-placeholder">
+          <span>Koordinat belum diset untuk closure ini</span>
+        </div>
+      <?php endif; ?>
     </div>
 
     <div class="closure-visual">
@@ -270,7 +338,19 @@ $core_data = mysqli_query($conn, $core_query);
           'Kuning' => '#f8e71c',
           'Ungu' => '#9013fe',
           'Merah Muda' => '#ffb6c1',
-          'Aqua' => '#50e3c2'
+          'Aqua' => '#50e3c2',
+          'Biru Muda' => '#87ceeb',
+          'Oranye Muda' => '#ffd700',
+          'Hijau Muda' => '#90ee90',
+          'Coklat Muda' => '#deb887',
+          'Abu-abu Muda' => '#d3d3d3',
+          'Pink' => '#ffc0cb',
+          'Merah Tua' => '#8b0000',
+          'Hitam Muda' => '#696969',
+          'Kuning Muda' => '#ffffe0',
+          'Ungu Muda' => '#dda0dd',
+          'Tosca' => '#40e0d0',
+          'Silver' => '#c0c0c0'
         ];
 
         $i = 1;
@@ -290,9 +370,28 @@ $core_data = mysqli_query($conn, $core_query);
     </div>
 
     <div class="actions">
-      <a href="edit_closure.php?id=<?= $closure['id_closure'] ?>" class="btn">✏️ Edit</a>
+      <a href="edit_closure.php?id=<?= $closure['id_closure'] ?>" class="btn">Edit</a>
       <a href="dashboard.php" class="btn btn-secondary">← Kembali</a>
     </div>
   </div>
+
+  <?php if($has_koordinat && $lat && $lng): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const lat = <?= json_encode((float)$lat) ?>;
+      const lng = <?= json_encode((float)$lng) ?>;
+      
+      const map = L.map('detail-map').setView([lat, lng], 16);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+      
+      const marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup('<b><?= htmlspecialchars($closure['nama_closure']) ?></b><br><?= htmlspecialchars($closure['alamat_fisik']) ?>').openPopup();
+    });
+  </script>
+  <?php endif; ?>
 </body>
 </html>
