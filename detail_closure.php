@@ -35,311 +35,67 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
         crossorigin="" />
   
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Inter', sans-serif;
-      background: #f8f8f8;
-      color: #222;
-    }
-
-    .navbar {
-      background: #fff;
-      border-bottom: 1px solid #e5e5e5;
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .navbar a {
-      text-decoration: none;
-      font-size: 22px;
-      color: #000;
-    }
-
-    .navbar h1 {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-
-    .header-card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .header-card h2 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .header-card .subtitle {
-      color: #777;
-      font-size: 14px;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    .info-card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 16px;
-    }
-
-    .info-card .label {
-      font-size: 12px;
-      color: #777;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .info-card .value {
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    /* Map Section */
-    .map-section {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .map-section h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: #111;
-    }
-
-    #detail-map {
-      height: 350px;
-      width: 100%;
-      border-radius: 8px;
-      border: 2px solid #e0e0e0;
-    }
-
-    .map-placeholder {
-      height: 350px;
-      width: 100%;
-      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #9ca3af;
-      font-size: 16px;
-      border: 2px dashed #d1d5db;
-      gap: 8px;
-    }
-
-    .closure-visual {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 24px;
-      margin-top: 30px;
-    }
-
-    .closure-visual h3 {
-      font-size: 18px;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 20px;
-      color: #111;
-    }
-
-    .cores-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 16px;
-    }
-
-    .core-item {
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
-      background: #fafafa;
-      transition: 0.2s;
-    }
-
-    .core-item:hover {
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .core-number {
-      font-size: 12px;
-      color: #555;
-      margin-bottom: 8px;
-    }
-
-    .color-dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-bottom: 8px;
-      border: 1px solid #999;
-    }
-
-    .core-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 6px;
-    }
-
-    .core-destination {
-      font-size: 11px;
-      background: #f0f0f0;
-      border-radius: 6px;
-      padding: 4px 6px;
-      min-height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .core-destination.empty {
-      color: #aaa;
-      font-style: italic;
-    }
-
-    .actions {
-      margin-top: 40px;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: 1px solid #000;
-      border-radius: 8px;
-      padding: 10px 20px;
-      background: #000;
-      color: #fff;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      transition: 0.3s;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background: #fff;
-      color: #000;
-    }
-
-    .btn-secondary {
-      background: #fff;
-      color: #000;
-    }
-
-    .btn-secondary:hover {
-      background: #000;
-      color: #fff;
-    }
-
-    #map-error { 
-      display:none; 
-      background:#ffe6e6; 
-      border:1px solid #ffb3b3; 
-      color:#800; 
-      padding:10px; 
-      border-radius:6px; 
-      margin-bottom:10px; 
-    }
-
-    /* coord-controls removed: editing coordinates handled in Edit page */
-
-    @media (max-width: 768px) {
-      #detail-map, .map-placeholder {
-        height: 250px;
-      }
-
-      .coord-controls {
-        flex-direction: column;
-      }
-
-      #coord-input, #save-coord {
-        width: 100%;
-      }
     }
   </style>
 </head>
-<body>
-  <div class="navbar">
-    <a href="dashboard.php">←</a>
-    <h1>Detail Closure</h1>
+<body class="bg-gray-100">
+  <!-- Navbar -->
+  <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-4 flex items-center gap-4">
+    <a href="dashboard.php" class="text-2xl text-black">←</a>
+    <h1 class="text-lg font-semibold">Detail Closure</h1>
   </div>
 
-  <div class="container">
-    <div class="header-card">
-      <h2><?= htmlspecialchars($closure['nama_closure']) ?></h2>
-      <div class="subtitle"><?= htmlspecialchars($closure['kode_closure']) ?></div>
+  <!-- Container -->
+  <div class="max-w-4xl mx-auto my-10 px-5">
+    <!-- Header Card -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+      <h2 class="text-2xl font-semibold mb-1"><?= htmlspecialchars($closure['nama_closure']) ?></h2>
+      <div class="text-gray-500 text-sm"><?= htmlspecialchars($closure['kode_closure']) ?></div>
 
-      <div class="info-grid">
-        <div class="info-card">
-          <div class="label">Jenis Kabel</div>
-          <div class="value"><?= htmlspecialchars($closure['jenis_kabel']) ?></div>
+      <!-- Info Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="text-xs text-gray-500 uppercase tracking-widest mb-1">Jenis Kabel</div>
+          <div class="text-sm font-medium"><?= htmlspecialchars($closure['jenis_kabel']) ?></div>
         </div>
-        <div class="info-card">
-          <div class="label">Alamat Fisik</div>
-          <div class="value"><?= htmlspecialchars($closure['alamat_fisik']) ?></div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="text-xs text-gray-500 uppercase tracking-widest mb-1">Alamat Fisik</div>
+          <div class="text-sm font-medium"><?= htmlspecialchars($closure['alamat_fisik']) ?></div>
         </div>
         <?php if($closure['koordinat']): ?>
-        <div class="info-card">
-          <div class="label">Koordinat GPS</div>
-          <div class="value" style="font-family: monospace; font-size: 13px;"><?= htmlspecialchars($closure['koordinat']) ?></div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="text-xs text-gray-500 uppercase tracking-widest mb-1">Koordinat GPS</div>
+          <div class="text-sm font-medium font-mono"><?= htmlspecialchars($closure['koordinat']) ?></div>
         </div>
         <?php endif; ?>
         <?php if($closure['jarak_tujuan']): ?>
-        <div class="info-card">
-          <div class="label">Jarak Tujuan</div>
-          <div class="value"><?= htmlspecialchars($closure['jarak_tujuan']) ?> km</div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="text-xs text-gray-500 uppercase tracking-widest mb-1">Jarak Tujuan</div>
+          <div class="text-sm font-medium"><?= htmlspecialchars($closure['jarak_tujuan']) ?> km</div>
         </div>
         <?php endif; ?>
       </div>
     </div>
 
     <!-- Map Section -->
-    <div class="map-section">
-      <h3>Lokasi Closure</h3>
-      <div id="map-error">Peta gagal dimuat. Periksa koneksi internet atau coba refresh halaman.</div>
-      <div id="detail-map"></div>
+    <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Lokasi Closure</h3>
+      <div id="map-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-4">
+        Peta gagal dimuat. Periksa koneksi internet atau coba refresh halaman.
+      </div>
+      <div id="detail-map" class="h-80 w-full rounded-lg border-2 border-gray-200"></div>
     </div>
 
-    <div class="closure-visual">
-      <h3>Data Core Fiber</h3>
-      <div class="cores-container">
+    <!-- Closure Visual -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <h3 class="text-lg font-semibold text-center mb-5 text-gray-900">Data Core Fiber</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         <?php 
         $color_map = [
           'Biru' => '#4a90e2',
@@ -372,11 +128,13 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
         while($core = mysqli_fetch_assoc($core_data)): 
           $color = $color_map[$core['warna_core']] ?? '#ccc';
         ?>
-        <div class="core-item">
-          <div class="core-number">Core <?= $i ?></div>
-          <div class="color-dot" style="background-color: <?= $color ?>"></div>
-          <div class="core-label"><?= htmlspecialchars($core['warna_core']) ?></div>
-          <div class="core-destination <?= empty(trim($core['tujuan_core'])) ? 'empty' : '' ?>">
+        <div class="border border-gray-200 rounded-lg p-3 text-center bg-gray-50 hover:bg-white hover:shadow transition-all duration-200">
+          <div class="text-xs text-gray-600 mb-2">Core <?= $i ?></div>
+          <div class="flex justify-center mb-2">
+            <div class="w-4 h-4 rounded-full border border-gray-400" style="background-color: <?= $color ?>"></div>
+          </div>
+          <div class="text-xs font-medium text-gray-800 mb-1"><?= htmlspecialchars($core['warna_core']) ?></div>
+          <div class="text-xs bg-gray-100 rounded px-1.5 py-1 min-h-5 flex items-center justify-center <?= empty(trim($core['tujuan_core'])) ? 'text-gray-400 italic' : '' ?>">
             <?= !empty(trim($core['tujuan_core'])) ? htmlspecialchars($core['tujuan_core']) : 'Belum Terisi' ?>
           </div>
         </div>
@@ -384,9 +142,14 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
       </div>
     </div>
 
-    <div class="actions">
-      <a href="edit_closure.php?id=<?= $closure['id_closure'] ?>" class="btn">Edit</a>
-      <a href="dashboard.php" class="btn btn-secondary">← Kembali</a>
+    <!-- Actions -->
+    <div class="mt-10 flex justify-center gap-3 flex-wrap">
+      <a href="edit_closure.php?id=<?= $closure['id_closure'] ?>" class="px-5 py-2.5 bg-black text-white rounded-lg font-semibold text-sm hover:bg-white hover:text-black border border-black transition-colors duration-300">
+        Edit
+      </a>
+      <a href="dashboard.php" class="px-5 py-2.5 bg-white text-black rounded-lg font-semibold text-sm hover:bg-black hover:text-white border border-black transition-colors duration-300">
+        ← Kembali
+      </a>
     </div>
   </div>
 
