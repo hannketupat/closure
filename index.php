@@ -62,175 +62,70 @@ if (isset($_POST['login'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Manajemen Closure Fiber Optic</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #ffffffff 0%, #ecebffff 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            max-width: 900px;
-            width: 100%;
-            display: flex;
-        }
-
-        .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, #18309cff 0%, #0f0b51ff 100%);
-            padding: 60px 40px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-left h1 {
-            font-size: 32px;
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        .login-left p {
-            font-size: 16px;
-            line-height: 1.6;
-            opacity: 0.9;
-        }
-
-        .fiber-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin-bottom: 30px;
-        }
-
-        .login-right {
-            flex: 1;
-            padding: 60px 40px;
-        }
-
-        .login-right h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .login-right .subtitle {
-            color: #666;
-            margin-bottom: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #18309cff 0%, #0f0b51ff 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .alert-error {
-            background: #fee;
-            color: #c33;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #c33;
-        }
-
-        @media (max-width: 768px) {
-            .login-container {
-                flex-direction: column;
-            }
-            .login-left {
-                padding: 40px 30px;
-            }
-            .login-right {
-                padding: 40px 30px;
-            }
         }
     </style>
 </head>
-<body>
-    <div class="login-container">
-        <div class="login-left">
-            <h1>Sistem Manajemen Closure</h1>
-            <p>PT. Rafa Teknologi Solusi</p>
+<body class="bg-gradient-to-br from-white to-purple-100 min-h-screen flex items-center justify-center p-5">
+    <!-- Login Container -->
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden max-w-4xl w-full flex">
+        
+        <!-- Left Section - Branding -->
+        <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-900 to-purple-950 text-white flex-col justify-center items-center p-16">
+            <h1 class="text-4xl font-bold mb-5">Sistem Manajemen Closure</h1>
+            <p class="text-lg opacity-90">PT. Rafa Teknologi Solusi</p>
         </div>
-        <div class="login-right">
-            <h2>Selamat Datang</h2>
-            <p class="subtitle">Silakan login untuk melanjutkan</p>
+
+        <!-- Right Section - Login Form -->
+        <div class="w-full md:w-1/2 p-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">Selamat Datang</h2>
+            <p class="text-gray-600 mb-10">Silakan login untuk melanjutkan</p>
             
             <?php if(isset($error)): ?>
-                <div class="alert-error"><?= $error ?></div>
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-6">
+                    <?= $error ?>
+                </div>
             <?php endif; ?>
 
             <form method="POST">
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" required autocomplete="username">
+                <!-- Username Input -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold text-sm mb-2">Username</label>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        required 
+                        autocomplete="username"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-base transition-all duration-300 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                    >
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required autocomplete="current-password">
+
+                <!-- Password Input -->
+                <div class="mb-8">
+                    <label class="block text-gray-700 font-semibold text-sm mb-2">Password</label>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-base transition-all duration-300 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                    >
                 </div>
-                <button type="submit" name="login" class="btn-login">Login</button>
+
+                <!-- Login Button -->
+                <button 
+                    type="submit" 
+                    name="login"
+                    class="w-full py-3 bg-gradient-to-r from-blue-900 to-purple-950 text-white font-bold rounded-xl text-base transition-all duration-300 hover:shadow-lg hover:translate-y-[-2px]"
+                >
+                    Login
+                </button>
             </form>
         </div>
     </div>

@@ -199,284 +199,48 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        /* CSS yang Anda sediakan (tidak ada perubahan signifikan, hanya penyesuaian untuk dropdown) */
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: #fff;
-            color: #000000ff;
-            margin: 0;
-            padding: 0;
-        }
-
-        .navbar {
-            background: #ffffffff;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 16px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 16px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .back-btn {
-            text-decoration: none;
-            color: #111;
-            font-size: 22px;
-            transition: 0.2s;
-        }
-
-        .back-btn:hover {
-            transform: translateX(-4px);
-        }
-
-        .navbar h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .form-card {
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 32px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .form-section h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
-            border-radius: 12px;
-            font-size: 14px;
-            background: #fafafa;
-            color: #111;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #000;
-            background: #fff;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        /* Map Styles */
-        #map {
-            height: 400px;
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            margin-top: 10px;
-        }
-
-        .map-info {
-            background: #f0f7ff;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #1f3fb1;
-            margin-bottom: 15px;
-            border-left: 3px solid #1f3fb1;
-        }
-
-        .core-table-wrapper {
-            overflow-x: auto;
-        }
-
-        .core-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .core-table th,
-        .core-table td {
-            padding: 12px;
-            border: 1px solid #e0e0e0;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        .core-table th {
-            background: #f7f7f7;
-            font-weight: 600;
-        }
-
-        .core-table td input[type="text"],
-        .core-table td select {
-            /* Menyesuaikan style input/select di dalam tabel */
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background: #fafafa;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .core-table td input[type="text"]:focus,
-        .core-table td select:focus {
-            outline: none;
-            border-color: #000;
-            background: #fff;
-        }
-
-        .core-color-display { /* Wrapper baru untuk menampilkan dot warna */
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .color-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            border: 1px solid #ccc;
-        }
-        /* Penambahan style untuk select agar tidak bertabrakan dengan class .form-group select */
-        .core-table select {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #fafafa;
-        }
-
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 25px;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 20px;
-        }
-
-        .btn {
-            border: none;
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-primary {
-            background: #1f3fb1ff;
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: #333;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            text-align: center;
-            color: #000;
-            border: 1px solid #000;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-secondary:hover {
-            background: #000;
-            color: #fff;
-        }
-
-        .info-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #f0f0f0;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            margin-left: 8px;
-        }
-
-        @media (max-width: 768px) {
-            #map {
-                height: 300px;
-            }
         }
     </style>
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
-<body>
-    <div class="navbar">
-        <a href="detail_closure.php?id=<?= $id ?>" class="back-btn">←</a>
-        <h1>Edit Closure</h1>
+<body class="bg-white text-gray-900">
+    <!-- Navbar -->
+    <div class="sticky top-0 z-50 bg-white border-b border-gray-200 px-10 py-4 flex items-center justify-start gap-4">
+        <a href="detail_closure.php?id=<?= $id ?>" class="text-2xl text-black hover:translate-x-[-4px] transition-transform">←</a>
+        <h1 class="text-xl font-semibold">Edit Closure</h1>
     </div>
 
-    <div class="container">
+    <!-- Container -->
+    <div class="max-w-3xl mx-auto my-10 px-5">
         <form method="POST">
-            <div class="form-card">
-                <div class="form-section">
-                    <h3>Informasi Dasar Closure</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Kode Closure</label>
-                            <input type="text" name="kode_closure" value="<?= htmlspecialchars($closure['kode_closure']) ?>" required>
+            <!-- Form Card 1: Informasi Dasar & Lokasi -->
+            <div class="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+                <!-- Section: Informasi Dasar -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-5 border-b border-gray-200 pb-2 text-gray-900">Informasi Dasar Closure</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Kode Closure</label>
+                            <input type="text" name="kode_closure" value="<?= htmlspecialchars($closure['kode_closure']) ?>" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
                         </div>
-                        <div class="form-group">
-                            <label>Nama Closure</label>
-                            <input type="text" name="nama_closure" value="<?= htmlspecialchars($closure['nama_closure']) ?>" required>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Nama Closure</label>
+                            <input type="text" name="nama_closure" value="<?= htmlspecialchars($closure['nama_closure']) ?>" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Jenis Kabel</label>
-                        <select name="jenis_kabel" required onchange="alert('Perhatian: Mengubah jenis kabel akan mempengaruhi jumlah core. Silakan simpan dan refresh halaman untuk melihat perubahan.')">
+                    <div class="mt-5">
+                        <label class="block mb-2 text-sm font-medium">Jenis Kabel</label>
+                        <select name="jenis_kabel" required onchange="alert('Perhatian: Mengubah jenis kabel akan mempengaruhi jumlah core. Silakan simpan dan refresh halaman untuk melihat perubahan.')" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
                             <option value="4 core" <?= $closure['jenis_kabel'] == '4 core' ? 'selected' : '' ?>>4 Core</option>
                             <option value="8 core" <?= $closure['jenis_kabel'] == '8 core' ? 'selected' : '' ?>>8 Core</option>
                             <option value="12 core" <?= $closure['jenis_kabel'] == '12 core' ? 'selected' : '' ?>>12 Core</option>
@@ -485,40 +249,44 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                     </div>
                 </div>
 
-                <div class="form-section">
-                    <h3>Lokasi & Jarak</h3>
-                    <div class="form-group">
-                        <label>Alamat Fisik</label>
-                        <textarea name="alamat_fisik" required><?= htmlspecialchars($closure['alamat_fisik']) ?></textarea>
+                <!-- Section: Lokasi & Jarak -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-5 border-b border-gray-200 pb-2 text-gray-900">Lokasi & Jarak</h3>
+                    
+                    <div class="mb-5">
+                        <label class="block mb-2 text-sm font-medium">Alamat Fisik</label>
+                        <textarea name="alamat_fisik" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors resize-none"><?= htmlspecialchars($closure['alamat_fisik']) ?></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label>Koordinat GPS</label>
-                        <input type="text" id="koordinat" name="koordinat" value="<?= htmlspecialchars($closure['koordinat']) ?>" placeholder="-6.2088,106.8456">
-                        <div id="map" style="height:300px;border:1px solid #e0e0e0;margin-top:10px;border-radius:8px;"></div>
-                        <small>Anda bisa drag marker untuk mengubah koordinat atau paste langsung "lat,lng" lalu simpan.</small>
+                    <div class="mb-5">
+                        <label class="block mb-2 text-sm font-medium">Koordinat GPS</label>
+                        <input type="text" id="koordinat" name="koordinat" value="<?= htmlspecialchars($closure['koordinat']) ?>" placeholder="-6.2088,106.8456" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
+                        <div id="map" class="h-72 w-full border border-gray-200 rounded-lg mt-3"></div>
+                        <small class="text-gray-500 text-xs mt-2 block">Anda bisa drag marker untuk mengubah koordinat atau paste langsung "lat,lng" lalu simpan.</small>
                     </div>
 
-                    <div class="form-group">
-                        <label>Jarak ke Tujuan (km)</label>
-                        <input type="number" step="0.01" name="jarak_tujuan" value="<?= htmlspecialchars($closure['jarak_tujuan']) ?>">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium">Jarak ke Tujuan (km)</label>
+                        <input type="number" step="0.01" name="jarak_tujuan" value="<?= htmlspecialchars($closure['jarak_tujuan']) ?>" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
                     </div>
                 </div>
             </div>
 
-            <div class="form-card">
-                <div class="form-section">
-                    <h3>
+            <!-- Form Card 2: Data Core Fiber -->
+            <div class="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+                <div>
+                    <h3 class="text-lg font-semibold mb-5 border-b border-gray-200 pb-2 text-gray-900">
                         Data Core Fiber
-                        <span class="info-badge"><?= $total_cores ?> Core</span>
+                        <span class="inline-block ml-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-700"><?= $total_cores ?> Core</span>
                     </h3>
-                    <div class="core-table-wrapper">
-                        <table class="core-table">
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
                             <thead>
-                                <tr>
-                                    <th>No Core</th>
-                                    <th>Warna Core</th>
-                                    <th>Tujuan Core</th>
+                                <tr class="bg-gray-50">
+                                    <th class="px-3 py-3 border border-gray-200 text-left text-sm font-semibold">No Core</th>
+                                    <th class="px-3 py-3 border border-gray-200 text-left text-sm font-semibold">Warna Core</th>
+                                    <th class="px-3 py-3 border border-gray-200 text-left text-sm font-semibold">Tujuan Core</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -541,19 +309,19 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                                     $hex = $warna_map[$core_warna] ?? '#ccc';
                                     $core_id_value = isset($core[$core_pk]) ? $core[$core_pk] : 0;
                                 ?>
-                                    <tr>
-                                        <td style="text-align:center;"><?= $i + 1 ?></td>
-                                        <td>
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-3 py-3 border border-gray-200 text-center text-sm"><?= $i + 1 ?></td>
+                                        <td class="px-3 py-3 border border-gray-200 text-sm">
                                             <input type="hidden" name="core_id[]" value="<?= $core_id_value ?>">
                                             
-                                            <div class="core-color-display" id="color-display-<?= $i ?>">
-                                                <span class="color-dot" style="background-color:<?= $hex ?>; border-color: <?= $core_warna == 'Putih' ? '#000' : '#ccc' ?>;"></span>
-                                                </div>
+                                            <div class="flex items-center gap-2 mb-2" id="color-display-<?= $i ?>">
+                                                <span class="w-3 h-3 rounded-full flex-shrink-0 border" style="background-color:<?= $hex ?>; border-color: <?= $core_warna == 'Putih' ? '#000' : '#999' ?>;"></span>
+                                            </div>
                                             
                                             <select 
                                                 name="warna_core_select[]" 
                                                 onchange="updateCoreColor(this, '<?= $i ?>')" 
-                                                style="margin-top: 5px;"
+                                                class="w-full px-2 py-2 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors"
                                             >
                                                 <?php foreach ($standard_colors as $color): 
                                                     $opt_hex = $warna_map[$color] ?? '#ccc';
@@ -568,8 +336,8 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                                                 <?php endforeach; ?>
                                             </select>
                                         </td>
-                                        <td>
-                                            <input type="text" name="tujuan_core[]" value="<?= htmlspecialchars($core['tujuan_core']) ?>" placeholder="Misal: ODP-001">
+                                        <td class="px-3 py-3 border border-gray-200 text-sm">
+                                            <input type="text" name="tujuan_core[]" value="<?= htmlspecialchars($core['tujuan_core']) ?>" placeholder="Misal: ODP-001" class="w-full px-2 py-2 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -578,9 +346,14 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    <a href="detail_closure.php?id=<?= $id ?>" class="btn btn-secondary">Batal</a>
+                <!-- Form Actions -->
+                <div class="flex gap-3 justify-end mt-6 pt-5 border-t border-gray-200">
+                    <button type="submit" class="px-6 py-3 bg-blue-900 text-white font-semibold text-sm rounded-lg hover:bg-gray-800 transition-colors">
+                        Simpan Perubahan
+                    </button>
+                    <a href="detail_closure.php?id=<?= $id ?>" class="px-6 py-3 bg-white text-black border border-black font-semibold text-sm rounded-lg hover:bg-black hover:text-white transition-colors text-center">
+                        Batal
+                    </a>
                 </div>
             </div>
         </form>
@@ -594,7 +367,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
             const selectedColorName = selectElement.value;
             const hexColor = WARNA_MAP_JS[selectedColorName] || '#ccc';
             const displayDiv = document.getElementById('color-display-' + coreIndex);
-            const colorDot = displayDiv.querySelector('.color-dot');
+            const colorDot = displayDiv.querySelector('.rounded-full');
 
             // Update warna dot
             colorDot.style.backgroundColor = hexColor;
@@ -603,7 +376,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
             if (selectedColorName === 'Putih') {
                  colorDot.style.borderColor = '#000';
             } else {
-                 colorDot.style.borderColor = '#ccc';
+                 colorDot.style.borderColor = '#999';
             }
         }
 
@@ -615,7 +388,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
         });
         
         // =======================================================
-        // KODE JAVASCRIPT LEAFLET UNTUK MAP (TIDAK BERUBAH)
+        // KODE JAVASCRIPT LEAFLET UNTUK MAP
         // =======================================================
         let map, marker;
 
