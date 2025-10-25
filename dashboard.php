@@ -7,7 +7,7 @@ $search = isset($_GET['cari']) ? $_GET['cari'] : "";
 $search_param = mysqli_real_escape_string($conn, $search);
 
 // Pagination settings
-$items_per_page = 15; // 9 items per page (3x3 grid)
+$items_per_page = 15; // 15 items per page (3x3 grid)
 $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $current_page = max(1, $current_page); // Ensure page is at least 1
 $offset = ($current_page - 1) * $items_per_page;
