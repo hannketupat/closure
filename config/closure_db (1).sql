@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 21, 2025 at 07:38 AM
+-- Generation Time: Oct 25, 2025 at 01:27 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.3.11
 
@@ -55,15 +55,16 @@ CREATE TABLE `closure` (
   `alamat_fisik` text NOT NULL,
   `koordinat` varchar(100) DEFAULT NULL,
   `jarak_tujuan` float DEFAULT NULL,
-  `tanggal_input` datetime DEFAULT CURRENT_TIMESTAMP
+  `tanggal_input` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `closure`
 --
 
-INSERT INTO `closure` (`id_closure`, `kode_closure`, `nama_closure`, `jenis_kabel`, `alamat_fisik`, `koordinat`, `jarak_tujuan`, `tanggal_input`) VALUES
-(11, 'CLS-901', 'Clousure 901 [TESTING]', '8 core', 'Jl. Padjajaran', '-6.441184864093675, 106.90470195376115', 1, '2025-10-18 13:56:50');
+INSERT INTO `closure` (`id_closure`, `kode_closure`, `nama_closure`, `jenis_kabel`, `alamat_fisik`, `koordinat`, `jarak_tujuan`, `tanggal_input`, `updated_at`) VALUES
+(11, 'CLS-901', 'Clousure 901 [TESTING]', '8 core', 'Jl. Padjajaran', '-6.579199893204445, 106.77715828836591', 1, '2025-10-18 13:56:50', '2025-10-25 08:23:39');
 
 -- --------------------------------------------------------
 
@@ -129,13 +130,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `closure`
 --
 ALTER TABLE `closure`
-  MODIFY `id_closure` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_closure` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `core_warna`
 --
 ALTER TABLE `core_warna`
-  MODIFY `id_core` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=201;
+  MODIFY `id_core` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=265;
 
 --
 -- Constraints for dumped tables

@@ -6,12 +6,27 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
 $search = isset($_GET['cari']) ? $_GET['cari'] : "";
 $search_param = mysqli_real_escape_string($conn, $search);
 
+// Pagination settings
+$items_per_page = 15; // 9 items per page (3x3 grid)
+$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$current_page = max(1, $current_page); // Ensure page is at least 1
+$offset = ($current_page - 1) * $items_per_page;
+
+// Get total count for pagination
+$count_query = "SELECT COUNT(*) as total FROM closure c 
+                WHERE nama_closure LIKE '%$search_param%' OR kode_closure LIKE '%$search_param%'";
+$count_result = mysqli_query($conn, $count_query);
+$total_items = mysqli_fetch_assoc($count_result)['total'];
+$total_pages = ceil($total_items / $items_per_page);
+
+// Main query with LIMIT for pagination
 $q = "SELECT c.*, 
       (SELECT COUNT(*) FROM core_warna WHERE id_closure = c.id_closure) as total_core,
       (SELECT COUNT(*) FROM core_warna WHERE id_closure = c.id_closure AND tujuan_core != '' AND tujuan_core IS NOT NULL) as core_terisi
       FROM closure c 
       WHERE nama_closure LIKE '%$search_param%' OR kode_closure LIKE '%$search_param%'
-      ORDER BY c.id_closure DESC";
+      ORDER BY c.id_closure DESC
+      LIMIT $offset, $items_per_page";
 $data = mysqli_query($conn, $q);
 
 $total_closure = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as total FROM closure"))['total'];
@@ -137,13 +152,39 @@ $core_kosong = $total_core - $core_terisi;
                 /* Always show on desktop */
             }
         }
+
+        /* Pagination Styles */
+        .pagination-btn {
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(.active):not(:disabled) {
+            background-color: #f3f4f6;
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
     </style>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body class="bg-gray-100">
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="bg-white shadow-sm sticky top-0 z-[9999]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center gap-4">
@@ -208,71 +249,73 @@ $core_kosong = $total_core - $core_terisi;
             </a>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-5 mb-8">
-            <div class="bg-white rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 overflow-hidden">
-                <div class="p-4 md:p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 md:w-12 md:h-12 gradient-secondary rounded-full flex items-center justify-center text-xl md:text-2xl text-white shadow-lg">
-                                📦
-                            </div>
-                        </div>
-                        <div class="ml-3 md:ml-5 flex-1 text-right">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Total Closure</p>
-                            <h4 class="text-xl md:text-3xl font-bold text-gray-800"><?= $total_closure ?></h4>
-                        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <!-- Total Closure -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Closure</p>
+                        <h3 class="text-3xl font-semibold text-gray-900 mt-1"><?= $total_closure ?></h3>
+                    </div>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                        <!-- Icon Folder -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+                        </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 overflow-hidden">
-                <div class="p-4 md:p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 md:w-12 md:h-12 gradient-success rounded-full flex items-center justify-center text-xl md:text-2xl text-white shadow-lg">
-                                🔗
-                            </div>
-                        </div>
-                        <div class="ml-3 md:ml-5 flex-1 text-right">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Total Core</p>
-                            <h4 class="text-xl md:text-3xl font-bold text-gray-800"><?= $total_core ?></h4>
-                        </div>
+            <!-- Total Core -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Core</p>
+                        <h3 class="text-3xl font-semibold text-gray-900 mt-1"><?= $total_core ?></h3>
+                    </div>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                        <!-- Icon Network -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m-4-8a9 9 0 11-9 9" />
+                        </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 overflow-hidden">
-                <div class="p-4 md:p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 md:w-12 md:h-12 gradient-warning rounded-full flex items-center justify-center text-xl md:text-2xl text-white shadow-lg">
-                                ✓
-                            </div>
-                        </div>
-                        <div class="ml-3 md:ml-5 flex-1 text-right">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Core Aktif</p>
-                            <h4 class="text-xl md:text-3xl font-bold text-gray-800"><?= $core_terisi ?></h4>
-                        </div>
+            <!-- Core Aktif -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Core Aktif</p>
+                        <h3 class="text-3xl font-semibold text-gray-900 mt-1"><?= $core_terisi ?></h3>
+                    </div>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-yellow-50 text-yellow-600">
+                        <!-- Icon Lightning -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl md:rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 overflow-hidden">
-                <div class="p-4 md:p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-10 h-10 md:w-12 md:h-12 gradient-danger rounded-full flex items-center justify-center text-xl md:text-2xl text-white shadow-lg">
-                                ○
-                            </div>
-                        </div>
-                        <div class="ml-3 md:ml-5 flex-1 text-right">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Core Kosong</p>
-                            <h4 class="text-xl md:text-3xl font-bold text-gray-800"><?= $core_kosong ?></h4>
-                        </div>
+            <!-- Core Kosong -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Core Kosong</p>
+                        <h3 class="text-3xl font-semibold text-gray-900 mt-1"><?= $core_kosong ?></h3>
+                    </div>
+                    <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                        <!-- Icon Circle -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <circle cx="12" cy="12" r="9" />
+                        </svg>
                     </div>
                 </div>
             </div>
         </div>
+
+
 
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
             <form method="get" class="flex flex-col md:flex-row gap-4">
@@ -293,6 +336,11 @@ $core_kosong = $total_core - $core_terisi;
         </div>
 
         <?php if (mysqli_num_rows($data) > 0): ?>
+            <!-- Pagination Info -->
+            <div class="mb-4 text-sm text-gray-600">
+                Menampilkan <?= $offset + 1 ?> - <?= min($offset + $items_per_page, $total_items) ?> dari <?= $total_items ?> closure
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
                 <?php while ($d = mysqli_fetch_assoc($data)):
                     $progress = $d['total_core'] > 0 ? ($d['core_terisi'] / $d['total_core']) * 100 : 0;
@@ -352,6 +400,12 @@ $core_kosong = $total_core - $core_terisi;
                                 </div>
                             </div>
 
+                            <?php if (!empty($d['updated_at'])): ?>
+                                <div class="text-xs text-gray-500 mt-2 text-right italic">
+                                    Last Update: <?= date('d M Y, H:i', strtotime($d['updated_at'])) ?>
+                                </div>
+                            <?php endif; ?>
+
                             <div class="closure-actions border-t border-gray-200 pt-4 mt-auto" id="actions-<?= $d['id_closure'] ?>">
                                 <div class="flex flex-col sm:flex-row gap-2.5 justify-center">
                                     <a href="detail_closure.php?id=<?= $d['id_closure'] ?>"
@@ -378,6 +432,90 @@ $core_kosong = $total_core - $core_terisi;
                     </div>
                 <?php endwhile; ?>
             </div>
+
+            <!-- Pagination Controls -->
+            <?php if ($total_pages > 1): ?>
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <!-- Page Info (Mobile) -->
+                        <div class="text-sm text-gray-600 sm:hidden">
+                            Halaman <?= $current_page ?> dari <?= $total_pages ?>
+                        </div>
+
+                        <!-- Pagination Buttons -->
+                        <div class="flex items-center gap-2 flex-wrap justify-center">
+                            <!-- First Page -->
+                            <a href="?page=1<?= $search ? '&cari=' . urlencode($search) : '' ?>" 
+                               class="pagination-btn border border-gray-300 text-gray-700 <?= $current_page == 1 ? 'pointer-events-none' : '' ?>"
+                               <?= $current_page == 1 ? 'disabled' : '' ?>>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                                </svg>
+                            </a>
+
+                            <!-- Previous Page -->
+                            <a href="?page=<?= max(1, $current_page - 1) ?><?= $search ? '&cari=' . urlencode($search) : '' ?>" 
+                               class="pagination-btn border border-gray-300 text-gray-700 <?= $current_page == 1 ? 'pointer-events-none' : '' ?>"
+                               <?= $current_page == 1 ? 'disabled' : '' ?>>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </a>
+
+                            <!-- Page Numbers -->
+                            <?php
+                            $start_page = max(1, $current_page - 2);
+                            $end_page = min($total_pages, $current_page + 2);
+
+                            if ($start_page > 1): ?>
+                                <a href="?page=1<?= $search ? '&cari=' . urlencode($search) : '' ?>" 
+                                   class="pagination-btn border border-gray-300 text-gray-700">1</a>
+                                <?php if ($start_page > 2): ?>
+                                    <span class="text-gray-400">...</span>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                                <a href="?page=<?= $i ?><?= $search ? '&cari=' . urlencode($search) : '' ?>" 
+                                   class="pagination-btn border border-gray-300 text-gray-700 <?= $i == $current_page ? 'active' : '' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+
+                            <?php if ($end_page < $total_pages): ?>
+                                <?php if ($end_page < $total_pages - 1): ?>
+                                    <span class="text-gray-400">...</span>
+                                <?php endif; ?>
+                                <a href="?page=<?= $total_pages ?><?= $search ? '&cari=' . urlencode($search) : '' ?>" 
+                                   class="pagination-btn border border-gray-300 text-gray-700"><?= $total_pages ?></a>
+                            <?php endif; ?>
+
+                            <!-- Next Page -->
+                            <a href="?page=<?= min($total_pages, $current_page + 1) ?><?= $search ? '&cari=' . urlencode($search) : '' ?>" 
+                               class="pagination-btn border border-gray-300 text-gray-700 <?= $current_page == $total_pages ? 'pointer-events-none' : '' ?>"
+                               <?= $current_page == $total_pages ? 'disabled' : '' ?>>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+
+                            <!-- Last Page -->
+                            <a href="?page=<?= $total_pages ?><?= $search ? '&cari=' . urlencode($search) : '' ?>" 
+                               class="pagination-btn border border-gray-300 text-gray-700 <?= $current_page == $total_pages ? 'pointer-events-none' : '' ?>"
+                               <?= $current_page == $total_pages ? 'disabled' : '' ?>>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                        </div>
+
+                        <!-- Page Info (Desktop) -->
+                        <div class="hidden sm:block text-sm text-gray-600">
+                            Halaman <?= $current_page ?> dari <?= $total_pages ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         <?php else: ?>
             <div class="bg-white rounded-2xl shadow-sm p-10 md:p-20 text-center">
                 <div class="text-7xl md:text-8xl opacity-30 mb-5">🔍</div>
@@ -520,8 +658,6 @@ $core_kosong = $total_core - $core_terisi;
         });
 
         // --- End of Navbar and Dropdown Logic ---
-
-        // Initialize all mini maps (Leaflet)
         // Initialize all mini maps (Leaflet)
         document.addEventListener('DOMContentLoaded', function() {
             const mapElements = document.querySelectorAll('.mini-map');

@@ -11,13 +11,13 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Closure Baru</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
+
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -103,7 +103,7 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
 
             for (let i = 0; i < jumlah; i++) {
                 const w = warna12[i % 12];
-                const textColor = (w.hex === '#ffffff' || w.hex === '#f8e71c' || w.hex === '#ffffe0' || w.hex === '#ffd700') ? '#000' : '#fff';
+                const textColor = (w.hex === '#ffffff' || w.hex === '#f8e71c') ? '#000' : '#fff';
                 html += `
           <tr class="hover:bg-gray-50 transition-colors">
             <td class="px-4 py-3 border border-gray-200 text-center text-sm text-gray-800 font-medium">${i + 1}</td>
@@ -114,7 +114,10 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
                 <input type="hidden" name="warna_core[]" value="${w.nama}">
               </div>
             </td>
-            <td class="px-4 py-3 border border-gray-200 text-sm"><input type="text" name="tujuan_core[]" placeholder="Misal: ODP-001" class="w-full px-2.5 py-2 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white focus:ring-1 focus:ring-gray-200 transition-colors"></td>
+            <td class="px-4 py-3 border border-gray-200 text-sm">
+              <input type="text" name="tujuan_core[]" placeholder="Misal: ODP-001"
+              class="w-full px-2.5 py-2 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white focus:ring-1 focus:ring-gray-200 transition-colors">
+            </td>
           </tr>
         `;
             }
@@ -123,12 +126,11 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
             tabelDiv.innerHTML = html;
         }
 
-        // Leaflet Map
+        // === PETA LEAFLET ===
         let map, marker;
 
         function initMap() {
-            // Default koordinat Jakarta
-            const defaultLat = -6.2088; 
+            const defaultLat = -6.2088;
             const defaultLng = 106.8456;
 
             map = L.map('map').setView([defaultLat, defaultLng], 13);
@@ -138,11 +140,12 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
                 maxZoom: 19
             }).addTo(map);
 
+            
+
             marker = L.marker([defaultLat, defaultLng], {
                 draggable: true
             }).addTo(map);
 
-            // Styling marker dengan warna yang lebih terlihat
             marker.setIcon(L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -152,154 +155,94 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
                 shadowSize: [41, 41]
             }));
 
-            // Update koordinat saat marker dipindah
-            marker.on('dragend', function(e) {
+            marker.on('dragend', function() {
                 const pos = marker.getLatLng();
                 updateKoordinat(pos.lat, pos.lng);
             });
 
-            // Klik map untuk set marker
             map.on('click', function(e) {
                 marker.setLatLng(e.latlng);
                 updateKoordinat(e.latlng.lat, e.latlng.lng);
             });
 
-            // Set koordinat awal
             updateKoordinat(defaultLat, defaultLng);
-            
-            // Force map to refresh size
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 100);
+
+            setTimeout(() => map.invalidateSize(), 100);
         }
 
         function updateKoordinat(lat, lng) {
-            // Update input fields dengan precision tinggi (8 desimal = akurasi ~1.1mm)
             const latStr = lat.toFixed(8);
             const lngStr = lng.toFixed(8);
-            
-            document.getElementById('coordinateInput').value = latStr + ', ' + lngStr;
-            document.getElementById('koordinat').value = latStr + ',' + lngStr;
-            
-            // Update display koordinat saat ini
-            const coordDisplay = document.getElementById('currentCoord');
-            if (coordDisplay) {
-                coordDisplay.textContent = latStr + ', ' + lngStr;
-            }
+
+            document.getElementById('coordinateInput').value = `${latStr}, ${lngStr}`;
+            document.getElementById('koordinat').value = `${latStr},${lngStr}`;
+            document.getElementById('currentCoord').textContent = `${latStr}, ${lngStr}`;
         }
 
         function updateFromLatLng() {
-            const coordInput = document.getElementById('coordinateInput').value.trim();
-            
-            // Parse format: "lat, lng" atau "lat,lng"
-            const parts = coordInput.split(',').map(p => p.trim());
-            
-            if (parts.length !== 2) {
-                alert('Format harus: latitude, longitude (contoh: -6.2088, 106.8456)');
+            const val = document.getElementById('coordinateInput').value.trim();
+            if (!val.includes(',')) {
+                alert('Format salah. Gunakan format: latitude, longitude');
                 return;
             }
-            
-            const latInput = parseFloat(parts[0]);
-            const lngInput = parseFloat(parts[1]);
-            
-            // Validasi input
-            if (isNaN(latInput) || isNaN(lngInput)) {
-                alert('Latitude dan Longitude harus berupa angka desimal');
+
+            const [latStr, lngStr] = val.split(',').map(v => v.trim());
+            const lat = parseFloat(latStr);
+            const lng = parseFloat(lngStr);
+
+            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                alert('Koordinat tidak valid. Coba ulangi.');
                 return;
             }
-            
-            if (latInput < -90 || latInput > 90) {
-                alert('Latitude harus antara -90 dan 90');
-                return;
-            }
-            
-            if (lngInput < -180 || lngInput > 180) {
-                alert('Longitude harus antara -180 dan 180');
-                return;
-            }
-            
-            if (map && marker) {
-                marker.setLatLng([latInput, lngInput]);
-                map.setView([latInput, lngInput], 17);
-                updateKoordinat(latInput, lngInput);
-            }
+
+            marker.setLatLng([lat, lng]);
+            map.setView([lat, lng], 17);
+            updateKoordinat(lat, lng);
         }
 
         function getCurrentLocation() {
             if (!navigator.geolocation) {
-                alert('Geolocation tidak didukung oleh browser Anda');
+                alert('Browser tidak mendukung geolokasi');
                 return;
             }
-            
-            const loadingMsg = document.createElement('div');
-            loadingMsg.textContent = 'Mendapatkan lokasi...';
-            loadingMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#fff;padding:20px;border-radius:8px;z-index:9999;font-size:14px;';
-            document.body.appendChild(loadingMsg);
-            
+
+            const loader = document.createElement('div');
+            loader.textContent = 'Mendapatkan lokasi...';
+            loader.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#fff;padding:20px;border-radius:8px;z-index:9999;font-size:14px;';
+            document.body.appendChild(loader);
+
             navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    if (document.body.contains(loadingMsg)) {
-                        document.body.removeChild(loadingMsg);
-                    }
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    
-                    document.getElementById('latitude').value = lat.toFixed(8);
-                    document.getElementById('longitude').value = lng.toFixed(8);
-                    
-                    if (map && marker) {
-                        marker.setLatLng([lat, lng]);
-                        map.setView([lat, lng], 17);
-                        updateKoordinat(lat, lng);
-                    }
+                (pos) => {
+                    document.body.removeChild(loader);
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    marker.setLatLng([lat, lng]);
+                    map.setView([lat, lng], 17);
+                    updateKoordinat(lat, lng);
                 },
-                function(error) {
-                    if (document.body.contains(loadingMsg)) {
-                        document.body.removeChild(loadingMsg);
-                    }
-                    let errorMsg = 'Gagal mendapatkan lokasi: ';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMsg += 'Izin lokasi ditolak. Aktifkan di pengaturan browser Anda.';
+                (err) => {
+                    document.body.removeChild(loader);
+                    let msg = 'Gagal mendapatkan lokasi: ';
+                    switch (err.code) {
+                        case err.PERMISSION_DENIED:
+                            msg += 'Izin lokasi ditolak.';
                             break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMsg += 'Informasi lokasi tidak tersedia.';
+                        case err.POSITION_UNAVAILABLE:
+                            msg += 'Lokasi tidak tersedia.';
                             break;
-                        case error.TIMEOUT:
-                            errorMsg += 'Permintaan lokasi timeout.';
+                        case err.TIMEOUT:
+                            msg += 'Timeout.';
                             break;
                         default:
-                            errorMsg += 'Terjadi kesalahan.';
+                            msg += 'Kesalahan tidak diketahui.';
                     }
-                    alert(errorMsg);
+                    alert(msg);
                 }
             );
         }
 
-        // Event listener untuk input fields - update peta saat user mengklik di field lain
-        document.addEventListener('DOMContentLoaded', function() {
-            const latInput = document.getElementById('latitude');
-            const lngInput = document.getElementById('longitude');
-            
-            if (latInput && lngInput) {
-                // Update saat user keluar dari input field (blur event)
-                latInput.addEventListener('blur', updateFromLatLng);
-                lngInput.addEventListener('blur', updateFromLatLng);
-                
-                // Allow Enter key to update
-                latInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') updateFromLatLng();
-                });
-                lngInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') updateFromLatLng();
-                });
-            }
-        });
-
-        // Initialize map setelah halaman load
         window.addEventListener('load', initMap);
     </script>
-</head>
 
 <body class="bg-white text-gray-900">
     <!-- Navbar -->
@@ -307,7 +250,13 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
         <a href="dashboard.php" class="text-2xl text-black hover:translate-x-[-4px] transition-transform">←</a>
         <h1 class="text-xl font-semibold">Tambah Closure Baru</h1>
     </div>
-
+    <div class="px-10 py-3 bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
+        <nav class="flex items-center space-x-2">
+            <a href="dashboard.php" class="hover:text-blue-700 transition-colors">Dashboard</a>
+            <span>/</span>
+            <span class="text-gray-900 font-medium">Tambah Closure</span>
+        </nav>
+    </div>
     <!-- Container -->
     <div class="max-w-3xl mx-auto my-10 px-5">
         <form action="proses_simpan.php" method="POST">
@@ -316,7 +265,7 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
                 <!-- Section: Informasi Dasar -->
                 <div class="mb-8">
                     <h3 class="text-lg font-semibold mb-5 border-b border-gray-200 pb-2">Informasi Dasar Closure</h3>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label class="block mb-2 text-sm font-medium">Kode Closure</label>
@@ -343,7 +292,7 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
                 <!-- Section: Lokasi & Jarak -->
                 <div>
                     <h3 class="text-lg font-semibold mb-5 border-b border-gray-200 pb-2">Lokasi & Jarak</h3>
-                    
+
                     <div class="mb-5">
                         <label class="block mb-2 text-sm font-medium">Alamat Fisik</label>
                         <textarea name="alamat_fisik" placeholder="Masukkan alamat lengkap..." required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors resize-none"></textarea>
@@ -383,7 +332,7 @@ if (!isset($_SESSION['admin'])) header("Location: index.php");
 
                     <div>
                         <label class="block mb-2 text-sm font-medium">Jarak ke Tujuan (km)</label>
-                        <input type="number" step="0.01" name="jarak_tujuan" placeholder="Contoh: 2.5" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
+                        <input type="number" step="0.01" name="jarak_tujuan" placeholder="Contoh: 2.5" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
                     </div>
                 </div>
             </div>
