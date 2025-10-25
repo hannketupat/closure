@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 session_start();
 // Pastikan file 'koneksi.php' tersedia dan berisi koneksi database ($conn)
-include 'koneksi.php'; 
+include 'koneksi.php';
 if (!isset($_SESSION['admin'])) header("Location: index.php");
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -57,11 +57,30 @@ if (!empty($existing_cores)) {
 
 // Daftar warna core standar (24 warna)
 $standard_colors = [
-    'Biru', 'Oranye', 'Hijau', 'Coklat', 'Abu-abu', 'Putih',
-    'Merah', 'Hitam', 'Kuning', 'Ungu', 'Merah Muda', 'Aqua',
-    'Biru Muda', 'Oranye Muda', 'Hijau Muda', 'Coklat Muda', 
-    'Abu-abu Muda', 'Pink', 'Merah Tua', 'Hitam Muda', 
-    'Kuning Muda', 'Ungu Muda', 'Tosca', 'Silver'
+    'Biru',
+    'Oranye',
+    'Hijau',
+    'Coklat',
+    'Abu-abu',
+    'Putih',
+    'Merah',
+    'Hitam',
+    'Kuning',
+    'Ungu',
+    'Merah Muda',
+    'Aqua',
+    'Biru Muda',
+    'Oranye Muda',
+    'Hijau Muda',
+    'Coklat Muda',
+    'Abu-abu Muda',
+    'Pink',
+    'Merah Tua',
+    'Hitam Muda',
+    'Kuning Muda',
+    'Ungu Muda',
+    'Tosca',
+    'Silver'
 ];
 
 // Gabungkan data existing dengan warna standar untuk memastikan semua core muncul (Hanya untuk pre-fill tampilan)
@@ -102,15 +121,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strpos($jenis, '4') !== false) {
         $new_total_cores = 4;
     } else {
-        $new_total_cores = 12; 
+        $new_total_cores = 12;
     }
-    
+
     // =======================================================
     // LOGIKA PENGHAPUSAN CORE BERLEBIHAN
     // =======================================================
     if ($new_total_cores < $old_core_count) {
         $cores_to_delete = $old_core_count - $new_total_cores;
-        
+
         // Asumsi: Core yang akan dihapus adalah core dengan ID tertinggi (yang paling terakhir di-insert/yang terakhir dalam urutan logis)
         if ($core_pk) {
             // Ambil ID Core yang akan dihapus: Urutkan berdasarkan $core_pk (ID Primary Key) secara DESC
@@ -121,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ORDER BY $core_pk DESC
                 LIMIT $cores_to_delete
             ";
-            
+
             $delete_result = mysqli_query($conn, $delete_ids_query);
             $ids_to_delete = [];
             while ($row = mysqli_fetch_assoc($delete_result)) {
@@ -130,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!empty($ids_to_delete)) {
                 $ids_string = implode(',', $ids_to_delete);
-                
+
                 // Hapus core yang berlebihan
                 $delete_query = "DELETE FROM core_warna WHERE $core_pk IN ($ids_string)";
                 mysqli_query($conn, $delete_query);
@@ -142,31 +161,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =======================================================
 
     $update_closure = "UPDATE closure SET 
-        kode_closure='$kode', 
-        nama_closure='$nama', 
-        jenis_kabel='$jenis',
-        alamat_fisik='$alamat',
-        koordinat='$koordinat',
-        jarak_tujuan='$jarak'
-        WHERE id_closure=$id";
+kode_closure='$kode', 
+nama_closure='$nama', 
+jenis_kabel='$jenis',
+alamat_fisik='$alamat',
+koordinat='$koordinat',
+jarak_tujuan='$jarak',
+updated_at=NOW()
+WHERE id_closure=$id";
     mysqli_query($conn, $update_closure);
 
     // Update atau insert core data
     // Kita menggunakan 'warna_core_select' sebagai nama input baru untuk menampung warna yang dipilih
-    if (isset($_POST['core_id']) && isset($_POST['warna_core_select'])) { 
+    if (isset($_POST['core_id']) && isset($_POST['warna_core_select'])) {
         $cores_processed = 0;
         foreach ($_POST['core_id'] as $i => $core_id) {
-            
+
             // Hentikan loop jika sudah memproses sebanyak $new_total_cores 
             if ($cores_processed >= $new_total_cores) {
-                break; 
+                break;
             }
-            
+
             $tujuan = mysqli_real_escape_string($conn, $_POST['tujuan_core'][$i]);
             // AMBIL NILAI DARI DROPDOWN BARU
             $warna = mysqli_real_escape_string($conn, $_POST['warna_core_select'][$i]);
             $core_id = intval($core_id);
-            
+
             if ($core_pk && $core_id > 0) {
                 // Update existing core
                 mysqli_query($conn, "UPDATE core_warna SET tujuan_core='$tujuan', warna_core='$warna' WHERE $core_pk=$core_id");
@@ -196,18 +216,18 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Closure - <?= htmlspecialchars($closure['nama_closure']) ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
     </style>
-    
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
@@ -217,7 +237,15 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
         <a href="detail_closure.php?id=<?= $id ?>" class="text-2xl text-black hover:translate-x-[-4px] transition-transform">←</a>
         <h1 class="text-xl font-semibold">Edit Closure</h1>
     </div>
-
+    <div class="px-10 py-3 bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
+        <nav class="flex items-center space-x-2">
+            <a href="dashboard.php" class="hover:text-blue-700 transition-colors">Dashboard</a>
+            <span>/</span>
+            <a href="detail.php" class="hover:text-blue-700 transition-colors">Detail Closure</a>
+            <span>/</span>
+            <span class="text-gray-900 font-medium">Edit Closure</span>
+        </nav>
+    </div>
     <!-- Container -->
     <div class="max-w-3xl mx-auto my-10 px-5">
         <form method="POST">
@@ -226,7 +254,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                 <!-- Section: Informasi Dasar -->
                 <div class="mb-8">
                     <h3 class="text-lg font-semibold mb-5 border-b border-gray-200 pb-2 text-gray-900">Informasi Dasar Closure</h3>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label class="block mb-2 text-sm font-medium">Kode Closure</label>
@@ -252,7 +280,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                 <!-- Section: Lokasi & Jarak -->
                 <div>
                     <h3 class="text-lg font-semibold mb-5 border-b border-gray-200 pb-2 text-gray-900">Lokasi & Jarak</h3>
-                    
+
                     <div class="mb-5">
                         <label class="block mb-2 text-sm font-medium">Alamat Fisik</label>
                         <textarea name="alamat_fisik" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors resize-none"><?= htmlspecialchars($closure['alamat_fisik']) ?></textarea>
@@ -279,7 +307,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                         Data Core Fiber
                         <span class="inline-block ml-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-700"><?= $total_cores ?> Core</span>
                     </h3>
-                    
+
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse">
                             <thead>
@@ -293,17 +321,32 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                                 <?php
                                 // MAP WARNA HEX
                                 $warna_map = [
-                                    'Biru' => '#4a90e2', 'Oranye' => '#f5a623', 'Hijau' => '#7ed321',
-                                    'Coklat' => '#a67c52', 'Abu-abu' => '#9b9b9b', 'Putih' => '#ffffff',
-                                    'Merah' => '#d0021b', 'Hitam' => '#000000', 'Kuning' => '#f8e71c',
-                                    'Ungu' => '#9013fe', 'Merah Muda' => '#ffb6c1', 'Aqua' => '#50e3c2',
-                                    'Biru Muda' => '#87ceeb', 'Oranye Muda' => '#ffd700', 'Hijau Muda' => '#90ee90',
-                                    'Coklat Muda' => '#deb887', 'Abu-abu Muda' => '#d3d3d3', 'Pink' => '#ffc0cb',
-                                    'Merah Tua' => '#8b0000', 'Hitam Muda' => '#696969', 
-                                    'Kuning Muda' => '#ffffe0', 'Ungu Muda' => '#dda0dd', 
-                                    'Tosca' => '#40e0d0', 'Silver' => '#c0c0c0'
+                                    'Biru' => '#4a90e2',
+                                    'Oranye' => '#f5a623',
+                                    'Hijau' => '#7ed321',
+                                    'Coklat' => '#a67c52',
+                                    'Abu-abu' => '#9b9b9b',
+                                    'Putih' => '#ffffff',
+                                    'Merah' => '#d0021b',
+                                    'Hitam' => '#000000',
+                                    'Kuning' => '#f8e71c',
+                                    'Ungu' => '#9013fe',
+                                    'Merah Muda' => '#ffb6c1',
+                                    'Aqua' => '#50e3c2',
+                                    'Biru Muda' => '#87ceeb',
+                                    'Oranye Muda' => '#ffd700',
+                                    'Hijau Muda' => '#90ee90',
+                                    'Coklat Muda' => '#deb887',
+                                    'Abu-abu Muda' => '#d3d3d3',
+                                    'Pink' => '#ffc0cb',
+                                    'Merah Tua' => '#8b0000',
+                                    'Hitam Muda' => '#696969',
+                                    'Kuning Muda' => '#ffffe0',
+                                    'Ungu Muda' => '#dda0dd',
+                                    'Tosca' => '#40e0d0',
+                                    'Silver' => '#c0c0c0'
                                 ];
-                                
+
                                 foreach ($core_data as $i => $core):
                                     $core_warna = $core['warna_core'];
                                     $hex = $warna_map[$core_warna] ?? '#ccc';
@@ -313,24 +356,22 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                                         <td class="px-3 py-3 border border-gray-200 text-center text-sm"><?= $i + 1 ?></td>
                                         <td class="px-3 py-3 border border-gray-200 text-sm">
                                             <input type="hidden" name="core_id[]" value="<?= $core_id_value ?>">
-                                            
+
                                             <div class="flex items-center gap-2 mb-2" id="color-display-<?= $i ?>">
                                                 <span class="w-3 h-3 rounded-full flex-shrink-0 border" style="background-color:<?= $hex ?>; border-color: <?= $core_warna == 'Putih' ? '#000' : '#999' ?>;"></span>
                                             </div>
-                                            
-                                            <select 
-                                                name="warna_core_select[]" 
-                                                onchange="updateCoreColor(this, '<?= $i ?>')" 
-                                                class="w-full px-2 py-2 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors"
-                                            >
-                                                <?php foreach ($standard_colors as $color): 
+
+                                            <select
+                                                name="warna_core_select[]"
+                                                onchange="updateCoreColor(this, '<?= $i ?>')"
+                                                class="w-full px-2 py-2 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:border-black focus:bg-white transition-colors">
+                                                <?php foreach ($standard_colors as $color):
                                                     $opt_hex = $warna_map[$color] ?? '#ccc';
                                                 ?>
-                                                    <option 
-                                                        value="<?= htmlspecialchars($color) ?>" 
+                                                    <option
+                                                        value="<?= htmlspecialchars($color) ?>"
                                                         <?= ($core_warna == $color) ? 'selected' : '' ?>
-                                                        style="background-color: <?= $opt_hex ?>; color: <?= $opt_hex == '#000000' || $opt_hex == '#8b0000' || $opt_hex == '#1f3fb1' ? 'white' : 'black' ?>;"
-                                                    >
+                                                        style="background-color: <?= $opt_hex ?>; color: <?= $opt_hex == '#000000' || $opt_hex == '#8b0000' || $opt_hex == '#1f3fb1' ? 'white' : 'black' ?>;">
                                                         <?= htmlspecialchars($color) ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -374,9 +415,9 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
 
             // Tambahkan border hitam untuk warna Putih
             if (selectedColorName === 'Putih') {
-                 colorDot.style.borderColor = '#000';
+                colorDot.style.borderColor = '#000';
             } else {
-                 colorDot.style.borderColor = '#999';
+                colorDot.style.borderColor = '#999';
             }
         }
 
@@ -386,7 +427,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
                 updateCoreColor(select, index);
             });
         });
-        
+
         // =======================================================
         // KODE JAVASCRIPT LEAFLET UNTUK MAP
         // =======================================================
@@ -421,6 +462,7 @@ $lng = $has_koordinat && isset($koordinat_parts[1]) ? trim($koordinat_parts[1]) 
 
             // handle paste/change on input to update marker
             const coordInput = document.getElementById('koordinat');
+
             function parseCoords(str) {
                 str = (str || '').trim();
                 const direct = str.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
